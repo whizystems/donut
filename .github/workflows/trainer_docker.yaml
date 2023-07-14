@@ -1,8 +1,5 @@
 # Create a basic github actions yaml pipeline that builds and pushes a docker image to docker hub
-on:
-  push:
-    branches:
-      - master
+on: [push]
 
 jobs:
   build:
