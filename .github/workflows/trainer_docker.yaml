@@ -1,0 +1,30 @@
+# Create a basic github actions yaml pipeline that builds and pushes a docker image to docker hub
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        version: '>= 363.0.0'
+
+    - name: Setup auth for Docker
+      run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --cache-from ${{ vars.GCP_IMAGE }}:latest --tag  ${{ vars.GCP_IMAGE }}:latest
+
+    - name: Push the Docker image to the repository
+      run: docker push ${{ vars.GCP_IMAGE }}:latest
+    
